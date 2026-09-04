@@ -22,19 +22,19 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-black text-green-400 font-mono flex flex-col items-center justify-center p-4">
-      <h1 className="text-5xl font-bold mb-8 tracking-widest text-yellow-300">💣 CHAT BOMB</h1>
+      <h1 className="text-5xl font-bold mb-8 tracking-widest text-yellow-300">CHAT BOMB</h1>
       <div className="flex gap-6 mb-10">
         <Link
           href="/create"
           className="border-2 border-yellow-300 px-8 py-3 text-xl hover:bg-yellow-300 hover:text-black transition"
         >
-          💥 CREATE ROOM
+          CREATE ROOM
         </Link>
         <Link
           href="/join"
           className="border-2 border-yellow-300 px-8 py-3 text-xl hover:bg-yellow-300 hover:text-black transition"
         >
-          🔑 ENTER ROOM
+          ENTER ROOM
         </Link>
       </div>
 

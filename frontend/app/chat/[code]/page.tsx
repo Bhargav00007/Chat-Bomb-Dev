@@ -50,7 +50,7 @@ export default function ChatPage() {
       setRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          setError('⏰ Room expired!');
+          setError('Room expired!');
           return 0;
         }
         return prev - 1;
@@ -129,11 +129,11 @@ export default function ChatPage() {
       {/* Header with room info and timer */}
       <div className="border-b border-green-600 pb-2 mb-4 flex justify-between items-center flex-wrap">
         <div>
-          <span className="text-yellow-300 text-2xl">💣 {roomName}</span>
+          <span className="text-yellow-300 text-2xl">{roomName}</span>
           <span className="text-sm text-gray-400 ml-4">by {creator}</span>
           <span className="text-sm text-gray-400 ml-4">code: {code}</span>
         </div>
-        <div className="text-xl text-yellow-300">⏳ {formatTime(remaining)}</div>
+        <div className="text-xl text-yellow-300">{formatTime(remaining)}</div>
       </div>
 
       {/* Messages */}
