@@ -27,7 +27,7 @@ export default function JoinPage() {
 
   return (
     <div className="min-h-screen bg-black text-green-400 font-mono flex flex-col items-center justify-center p-4">
-      <h1 className="text-4xl mb-6 text-yellow-300">🔑 ENTER ROOM</h1>
+      <h1 className="text-4xl mb-6 text-yellow-300">ENTER ROOM</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         <div>
           <label className="block text-sm">Your Name</label>
@@ -55,7 +55,7 @@ export default function JoinPage() {
           type="submit"
           className="w-full border-2 border-yellow-300 py-2 text-lg hover:bg-yellow-300 hover:text-black transition"
         >
-          🔓 JOIN
+          JOIN
         </button>
       </form>
     </div>
