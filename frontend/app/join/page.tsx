@@ -1,14 +1,21 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/app/lib/api';
 
 export default function JoinPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
+
+  // Prefill code if ?code=XXXXXX is in the URL
+  useEffect(() => {
+    const c = searchParams.get('code');
+    if (c) setCode(c.toUpperCase());
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +26,9 @@ export default function JoinPage() {
     const upperCode = code.toUpperCase();
     try {
       await api.getRoom(upperCode);
-      router.push(`/chat/${upperCode}?username=${encodeURIComponent(name)}`);
+      // Save username for the chat page
+      sessionStorage.setItem('chatbomb_username', name);
+      router.push(`/chat/${upperCode}`);
     } catch {
       setError('Invalid room code or room expired');
     }

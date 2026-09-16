@@ -18,7 +18,10 @@ export default function CreatePage() {
     }
     try {
       const room = await api.createRoom({ created_by: name, name: roomName });
-      router.push(`/chat/${room.code}?username=${encodeURIComponent(name)}`);
+      // Save username for the chat page
+      sessionStorage.setItem('chatbomb_username', name);
+      // Redirect – no query param
+      router.push(`/chat/${room.code}`);
     } catch {
       setError('Failed to create room. Try again.');
     }

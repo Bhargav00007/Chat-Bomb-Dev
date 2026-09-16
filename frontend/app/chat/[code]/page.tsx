@@ -1,16 +1,16 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/app/lib/api';
 import { ChatMessage } from '@/app/types';
 
 export default function ChatPage() {
   const params = useParams<{ code: string }>();
-  const searchParams = useSearchParams();
+  const router = useRouter();
   const code = params.code;
-  const username = searchParams.get('username') || 'Anonymous';
 
+  const [username, setUsername] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [remaining, setRemaining] = useState(0);
@@ -20,6 +20,16 @@ export default function ChatPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
+
+  // Read username from sessionStorage – redirect if missing
+  useEffect(() => {
+    const storedName = sessionStorage.getItem('chatbomb_username');
+    if (!storedName) {
+      router.push(`/join?code=${code}`);
+      return;
+    }
+    setUsername(storedName);
+  }, [code, router]);
 
   // Fetch room details
   useEffect(() => {
@@ -33,24 +43,27 @@ export default function ChatPage() {
         const diff = expiry.getTime() - now.getTime();
         if (diff <= 0) {
           setError('This room has expired.');
+          sessionStorage.removeItem('chatbomb_username');
         } else {
           setRemaining(Math.floor(diff / 1000));
         }
       } catch {
         setError('Room not found or expired.');
+        sessionStorage.removeItem('chatbomb_username');
       }
     };
     fetchRoom();
   }, [code]);
 
-  // Timer
+  // Timer – clear sessionStorage when it hits zero
   useEffect(() => {
     if (remaining <= 0) return;
     const timer = setInterval(() => {
       setRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          setError('Room expired!');
+          setError('⏰ Room expired!');
+          sessionStorage.removeItem('chatbomb_username');
           return 0;
         }
         return prev - 1;
@@ -63,7 +76,6 @@ export default function ChatPage() {
   const fetchMessages = async () => {
     try {
       const data = await api.get<any[]>(`/rooms/${code}/messages/`);
-      // Convert API response (content) to our message field
       const mapped = data.map((msg) => ({
         username: msg.username,
         message: msg.content,
@@ -76,15 +88,13 @@ export default function ChatPage() {
   };
 
   useEffect(() => {
-    if (error) return;
-    // Fetch immediately
+    if (error || !username) return;
     fetchMessages();
-    // Poll every 2 seconds
-    pollInterval.current = setInterval(fetchMessages, 3000);
+    pollInterval.current = setInterval(fetchMessages, 2000);
     return () => {
       if (pollInterval.current) clearInterval(pollInterval.current);
     };
-  }, [code, error]);
+  }, [code, error, username]);
 
   // Auto-scroll
   useEffect(() => {
@@ -93,14 +103,13 @@ export default function ChatPage() {
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !username) return;
     try {
       await api.post(`/rooms/${code}/messages/`, {
         username,
         content: input,
       });
       setInput('');
-      // Immediately fetch new messages
       await fetchMessages();
     } catch (err) {
       console.error('Failed to send message', err);
@@ -111,9 +120,21 @@ export default function ChatPage() {
     return (
       <div className="min-h-screen bg-black text-red-500 font-mono flex flex-col items-center justify-center p-4">
         <p className="text-2xl">{error}</p>
-        <a href="/" className="mt-4 border border-yellow-300 px-6 py-2 text-yellow-300 hover:bg-yellow-300 hover:text-black">
+        <a
+          href="/"
+          className="mt-4 border border-yellow-300 px-6 py-2 text-yellow-300 hover:bg-yellow-300 hover:text-black"
+        >
           ↩ Back Home
         </a>
+      </div>
+    );
+  }
+
+  // While username is loading
+  if (!username) {
+    return (
+      <div className="min-h-screen bg-black text-green-400 font-mono flex items-center justify-center">
+        <p className="text-xl animate-pulse">Loading...</p>
       </div>
     );
   }
@@ -126,14 +147,15 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-black text-green-400 font-mono flex flex-col p-4">
-      {/* Header with room info and timer */}
+      {/* Header */}
       <div className="border-b border-green-600 pb-2 mb-4 flex justify-between items-center flex-wrap">
         <div>
-          <span className="text-yellow-300 text-2xl">{roomName}</span>
+          <span className="text-yellow-300 text-2xl">💣 {roomName}</span>
           <span className="text-sm text-gray-400 ml-4">by {creator}</span>
           <span className="text-sm text-gray-400 ml-4">code: {code}</span>
+          <span className="text-sm text-yellow-300 ml-4">you: {username}</span>
         </div>
-        <div className="text-xl text-yellow-300">{formatTime(remaining)}</div>
+        <div className="text-xl text-yellow-300">⏳ {formatTime(remaining)}</div>
       </div>
 
       {/* Messages */}
@@ -150,7 +172,7 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message input */}
+      {/* Input */}
       <form onSubmit={sendMessage} className="flex gap-2">
         <input
           type="text"
@@ -170,7 +192,9 @@ export default function ChatPage() {
       </form>
 
       <div className="mt-2 text-sm text-gray-500">
-        {remaining > 0 ? `Room will self‑destruct in ${formatTime(remaining)}` : 'Room expired'}
+        {remaining > 0
+          ? `Room will self-destruct in ${formatTime(remaining)}`
+          : 'Room expired'}
       </div>
     </div>
   );
