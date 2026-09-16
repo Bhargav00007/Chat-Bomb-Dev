@@ -49,7 +49,7 @@ export default function HomePage() {
                   <span className="text-sm text-gray-400 ml-2">by {room.created_by}</span>
                 </div>
                 <Link href={`/chat/${room.code}`} className="text-yellow-300 underline hover:no-underline">
-                  join →
+                  join 
                 </Link>
               </li>
             ))}

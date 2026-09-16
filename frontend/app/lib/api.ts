@@ -13,19 +13,16 @@ class ApiClient {
     });
   }
 
-  // Generic GET
   async get<T>(url: string): Promise<T> {
     const response = await this.client.get<T>(url);
     return response.data;
   }
 
-  // Generic POST
   async post<T>(url: string, data: any): Promise<T> {
     const response = await this.client.post<T>(url, data);
     return response.data;
   }
 
-  // Room-specific methods
   async createRoom(data: { created_by: string; name: string }): Promise<Room> {
     return this.post<Room>('/rooms/create/', data);
   }
