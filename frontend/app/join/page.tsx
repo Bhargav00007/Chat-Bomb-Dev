@@ -11,7 +11,6 @@ export default function JoinPage() {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
 
-  // Prefill code if ?code=XXXXXX is in the URL
   useEffect(() => {
     const c = searchParams.get('code');
     if (c) setCode(c.toUpperCase());
@@ -26,7 +25,6 @@ export default function JoinPage() {
     const upperCode = code.toUpperCase();
     try {
       await api.getRoom(upperCode);
-      // Save username for the chat page
       sessionStorage.setItem('chatbomb_username', name);
       router.push(`/chat/${upperCode}`);
     } catch {

@@ -62,7 +62,7 @@ export default function ChatPage() {
       setRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          setError('⏰ Room expired!');
+          setError('Room expired!');
           sessionStorage.removeItem('chatbomb_username');
           return 0;
         }
@@ -150,12 +150,12 @@ export default function ChatPage() {
       {/* Header */}
       <div className="border-b border-green-600 pb-2 mb-4 flex justify-between items-center flex-wrap">
         <div>
-          <span className="text-yellow-300 text-2xl">💣 {roomName}</span>
+          <span className="text-yellow-300 text-2xl">{roomName}</span>
           <span className="text-sm text-gray-400 ml-4">by {creator}</span>
           <span className="text-sm text-gray-400 ml-4">code: {code}</span>
           <span className="text-sm text-yellow-300 ml-4">you: {username}</span>
         </div>
-        <div className="text-xl text-yellow-300">⏳ {formatTime(remaining)}</div>
+        <div className="text-xl text-yellow-300">{formatTime(remaining)}</div>
       </div>
 
       {/* Messages */}
